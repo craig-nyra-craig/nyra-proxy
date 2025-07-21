@@ -3,7 +3,7 @@ const express = require('express');
 const Groq = require('groq-sdk');
 
 const app = express();
-app.use(express.json()); // Parse JSON bodies
+app.use(express.json());
 
 const router = express.Router();
 
@@ -15,13 +15,13 @@ const keys = [
 
 const systemPrompt = `
 :: NYRA CORE PROTOCOL ::
-[Insert your full N.Y.R.A. protocol here, as in the original code]
+[Full protocol as before]
 `;
 
 async function getGroqResponse(message, history = []) {
   for (let i = 0; i < keys.length; i++) {
     try {
-      console.log(`Attempting key ${i+1}: ${keys[i] ? 'Key loaded' : 'Key missing'}`); // Debug log
+      console.log(`Attempting key ${i+1}`);
       const groq = new Groq({ apiKey: keys[i] });
       const chatCompletion = await groq.chat.completions.create({
         messages: [
@@ -39,11 +39,10 @@ async function getGroqResponse(message, history = []) {
   }
 }
 
+// POST route first
 router.post('/', async (req, res) => {
   const { message } = req.body;
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' });
-  }
+  if (!message) return res.status(400).json({ error: 'Message is required' });
   try {
     const response = await getGroqResponse(message);
     res.json({ response });
@@ -53,9 +52,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-app.use(router); // Mount router at root for simplicity in serverless
+// Temporary test GET - comment out after testing
+// router.get('/', (req, res) => res.send('N.Y.R.A. Proxy is Live!'));
 
-// Export as Vercel handler
+app.use(router);
+
 module.exports = app;
-
-router.get('/', (req, res) => res.send('N.Y.R.A. Proxy is Live!'));
