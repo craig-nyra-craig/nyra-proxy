@@ -39,8 +39,8 @@ async function getGroqResponse(message, history = []) {
   }
 }
 
-// POST route first
-router.post('/', async (req, res) => {
+// POST route
+router.post('/chat', async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: 'Message is required' });
   try {
@@ -52,9 +52,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Temporary test GET - comment out after testing
-// router.get('/', (req, res) => res.send('N.Y.R.A. Proxy is Live!'));
+// Temporary test GET
+router.get('/', (req, res) => res.send('N.Y.R.A. Proxy is Live!'));
 
-app.use(router);
+app.use('/api', router); // Mount at /api for /api/chat POST
 
 module.exports = app;
