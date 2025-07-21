@@ -57,3 +57,5 @@ app.use(router); // Mount router at root for simplicity in serverless
 
 // Export as Vercel handler
 module.exports = app;
+
+router.get('/', (req, res) => res.send('N.Y.R.A. Proxy is Live!'));
