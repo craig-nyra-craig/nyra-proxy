@@ -1,3 +1,5 @@
 {
-  "rewrites": [{ "source": "/api/chat", "destination": "/api/chat.js" }]
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/chat.js" }
+  ]
 }

@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const Groq = require('groq-sdk');
 
+const app = express();
+app.use(express.json()); // Parse JSON bodies
+
 const router = express.Router();
 
 const keys = [
@@ -12,13 +15,13 @@ const keys = [
 
 const systemPrompt = `
 :: NYRA CORE PROTOCOL ::
-[Full N.Y.R.A. protocol as provided earlier, omitted here for brevity]
-You are N.Y.R.A. Always respond adhering strictly to the above protocols, personality, and blueprint. Maintain conversation history in your responses for context-tracking.
+[Insert your full N.Y.R.A. protocol here, as in the original code]
 `;
 
 async function getGroqResponse(message, history = []) {
   for (let i = 0; i < keys.length; i++) {
     try {
+      console.log(`Attempting key ${i+1}: ${keys[i] ? 'Key loaded' : 'Key missing'}`); // Debug log
       const groq = new Groq({ apiKey: keys[i] });
       const chatCompletion = await groq.chat.completions.create({
         messages: [
@@ -30,7 +33,7 @@ async function getGroqResponse(message, history = []) {
       });
       return chatCompletion.choices[0].message.content;
     } catch (error) {
-      console.error(`Key ${i+1} failed:`, error);
+      console.error(`Key ${i+1} failed: ${error.message}`);
       if (i === keys.length - 1) throw error;
     }
   }
@@ -38,12 +41,19 @@ async function getGroqResponse(message, history = []) {
 
 router.post('/', async (req, res) => {
   const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
   try {
     const response = await getGroqResponse(message);
     res.json({ response });
   } catch (error) {
-    res.status(500).json({ error: 'API error' });
+    console.error('Request error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-module.exports = router;
+app.use(router); // Mount router at root for simplicity in serverless
+
+// Export as Vercel handler
+module.exports = app;
